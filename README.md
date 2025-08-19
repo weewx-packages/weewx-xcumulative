@@ -1,5 +1,8 @@
-# Cumulative XType Extension
+# Backup repository - weewx-xcumulative - Gary Roderick
+# https://github.com/gjr80/weewx-xcumulative
+**Note:** The original repository no longer exists. Here is the latest version available to me.
 
+# Cumulative XType Extension
 
 ## Description
 The *Cumulative XType* extension is a WeeWX extension that installs an XType that provides cumulative series data with a flexible, user settable reset date-time. When used with the WeeWX image generator this enables the generation of cumulative plots that reset at a specified time or date and time. For example, a cumulative rain plot can be produced for a day with the rainfall resetting to zero at midnight:

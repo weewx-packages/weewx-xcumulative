@@ -13,25 +13,22 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-Version: 0.1.0                                          Date: 23 October 2022
+Version: 0.1.1                                          Date: 23 October 2026
 
 Revision History
+    23 October 2026     v0.1.1
+        - dropped Python 2 support
+        - import weewx.units explicitly, it was only available through the
+          other WeeWX imports
+        - include the offending option in the parse_reset() exception message
     23 October 2022     v0.1.0
         - initial release
 
 Abbreviated Instruction for Use
 
-1.  Download the Cumulative XType extension package:
+1.  Install the extension with weectl extension install.
 
-    $ wget -P /var/tmp https://github.com/gjr80/weewx-gw1000/releases/download/v0.1.0/xcum-0.1.0.tar.gz
-
-2.  Install the Cumulative XType extension package
-
-    $ wee_extension --install=/var/tmp/xcum-0.1.0.tar.gz
-
-3.  Restart WeeWX:
-
-    $ sudo systemctl restart weewx
+2.  Restart WeeWX.
 
 You can now use the 'cumulative' aggregate type wherever you need a cumulative
 series, eg ImageGenerator plots. The reset time for the cumulative series data
@@ -41,7 +38,6 @@ programmatically.
 """
 
 # python imports
-from __future__ import absolute_import
 import datetime
 import logging
 import time
@@ -50,12 +46,13 @@ import time
 import weewx
 import weeutil.weeutil
 import weewx.engine
+import weewx.units
 import weewx.xtypes
 
 # we require WeeWX 4.6.0 or later so we can only use WeeWX 4 logging
 log = logging.getLogger(__name__)
 
-XCUM_VERSION = '0.1.0'
+XCUM_VERSION = '0.1.1'
 
 
 # ==============================================================================
@@ -305,7 +302,7 @@ class XCumulative(weewx.xtypes.XType):
                                           "option '%s'" % (reset_opt,))
             else:
                 # we have a reset option we cannot parse
-                _msg = "Cannot parse reset option '%s'"
+                _msg = "Cannot parse reset option '%s'" % (reset_opt, )
                 raise weewx.ViolatedPrecondition(_msg)
             return reset_list
 
@@ -349,7 +346,7 @@ class StdCumulativeXType(weewx.engine.StdService):
     """Instantiate and register the XCumulative XType."""
 
     def __init__(self, engine, config_dict):
-        super(StdCumulativeXType, self).__init__(engine, config_dict)
+        super().__init__(engine, config_dict)
 
         # obtain an XCumulative XType object
         self.xcumulative = XCumulative()

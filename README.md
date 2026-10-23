@@ -1,45 +1,78 @@
-# Backup repository - weewx-xcumulative - Gary Roderick
-# https://github.com/gjr80/weewx-xcumulative
-**Note:** The original repository no longer exists. Here is the latest version available to me.
+# Cumulative XType
 
-# Cumulative XType Extension
+A WeeWX XType that adds the aggregate type `cumulative`. It produces a running
+total of an observation, such as rain, that restarts at a time you choose. In an
+image generator plot this gives, for example, rainfall since midnight. It does not
+store anything in the database.
 
-## Description
-The *Cumulative XType* extension is a WeeWX extension that installs an XType that provides cumulative series data with a flexible, user settable reset date-time. When used with the WeeWX image generator this enables the generation of cumulative plots that reset at a specified time or date and time. For example, a cumulative rain plot can be produced for a day with the rainfall resetting to zero at midnight:
+This is a continuation of [gjr80/weewx-xcumulative](https://github.com/gjr80/weewx-xcumulative)
+by Gary Roderick, which no longer exists. It starts from the last copy of that
+repository, [Millardiang/weewx-xcumulative](https://github.com/Millardiang/weewx-xcumulative).
 
-![Rainfall since midnight](https://github.com/gjr80/weewx-xcumulative/blob/main/assets/daycumulativerain.png)
+![Rainfall since midnight](assets/daycumulativerain.png)
 
-The extension consists of a single WeeWX XType and an associated WeeWX service. A number of config options can be used to control the operation of the *Cumulative XType*.
+## Requirements
 
+WeeWX with a database that holds the observation you want to total. There are no
+external programs and no pip packages.
 
-## Pre-requisites
-The *Cumulative XType* extension requires WeeWX v4.6.0 or greater and will operate under Python 2 or Python 3.
+## Installation
 
+Install `xcumulative` from the [WeeWX packages catalog](https://github.com/weewx-packages/catalog/blob/main/packages/xcumulative.md).
+The catalog page lists the current release, its WeeWX and Python
+requirements, and the install, update and removal commands.
 
-## Installation Instructions
+The installer adds `user.xcumulative.StdCumulativeXType` to `xtype_services` in
+`weewx.conf`. Restart WeeWX afterwards.
 
-1.  Download the *Cumulative XType* extension package:
+## Configuration
 
-        $ wget -P /var/tmp https://github.com/gjr80/weewx-xcumulative/releases/download/v0.1.0/xcum-0.1.0.tar.gz
+The extension has no section in `weewx.conf`. Select it in a plot of a skin's
+`skin.conf`, with the options below on the plot line:
 
-2.  Install the *Cumulative XType* extension:
+```ini
+[ImageGenerator]
+    [[day_images]]
+        [[[daycumulativerain]]]
+            [[[[rain]]]]
+                aggregate_type = cumulative
+                aggregate_interval = 1h
+                reset = midnight
+                plot_type = bar
+```
 
-        $ wee_extension --install=/var/tmp/xcum-0.1.0.tar.gz
-            
-    **Note**: Depending on your system/installation the above command may need to be prefixed with sudo.
+| Option | Default | Meaning |
+|---|---|---|
+| `aggregate_interval` | none, required | Length of each data point. The total is reported at the end of each interval. |
+| `reset` | no reset | When the total returns to zero. One of the keywords `midnight`, `midday`, `day`, `month`, `year`, or a time `HH:MM` (every day), `DDTHH:MM` (day of the month), `MM-DDTHH:MM` (day of the year), `YYYY-MM-DDTHH:MM` (once). |
+| `ignore_none` | `true` | `true` leaves out data points that have no value. `false` keeps them in the series, and they add nothing to the total. |
 
-    **Note**: Depending on your WeeWX installation wee_extension may need to be prefixed with the path to *wee_extension*.
+The keywords stand for these times: `midnight` and `day` for `00:00` each day,
+`midday` for `12:00` each day, `month` for `1T00:00` and `year` for `01-01T00:00`.
 
-3.  Restart the WeeWX daemon:
+The point that ends exactly on a reset time is reported as zero and its own value
+is not counted. Outside a plot, call
+`XCumulative().get_series(obs_type, timespan, db_manager, 'cumulative', interval, reset=...)`
+with the same options.
 
-        $ sudo /etc/init.d/weewx restart
-        
-    or
+## Limitations
 
-        $ sudo service weewx restart
+* Tested with a small SQLite archive in the WeeWX schema, not with a live station
+  or the image generator's rendered output.
+* A day of the month that the month does not have, such as `31T00:00` in April,
+  raises a `ValueError`.
+* A reset time that does not parse falls back to `00:00`, a date that does not
+  parse is ignored, so the reset then happens every day.
 
-    or
+## Development
 
-        $ sudo systemctl restart weewx
+```
+just fast
+```
 
-4.  You may now use the aggregate type *cumulative* to produce cumulative series data with user selectable reset times.
+Run it from the repository root with the Python of a WeeWX installation on `PATH`.
+
+## License
+
+Copyright Gary Roderick. GNU General Public License, version 3 or any later
+version. See `LICENSE`.

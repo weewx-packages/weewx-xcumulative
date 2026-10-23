@@ -1,2 +1,11 @@
+v0.1.1  23 October 2026
+*   continuation of the original gjr80/weewx-xcumulative, which no longer exists
+*   fix: install.py imported distutils.version.StrictVersion, which was removed
+    in Python 3.12, so the extension could not be installed
+*   dropped Python 2 support
+*   the exception for an unparsable reset option now names the option
+*   added tests and a justfile
+*   removed readme.txt, README.md replaces it
+
 v0.1.0
 *   initial release
